@@ -1,0 +1,47 @@
+import pandas as pd
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename, asksaveasfilename
+
+def delete_selected_columns():
+    # Hide Tkinter root window
+    root = Tk()
+    root.withdraw()
+
+    print("Select the CSV file to clean...")
+    csv_file = askopenfilename(filetypes=[("CSV files", "*.csv")])
+    if not csv_file:
+        print("No file selected.")
+        return
+
+    df = pd.read_csv(csv_file)
+
+    # Display columns with indices
+    print("\nAvailable columns:")
+    for i, col in enumerate(df.columns):
+        print(f"{i}: {col}")
+
+    # Prompt user for indices to delete
+    indices_to_delete = input(
+        "\nEnter the indices of columns you want to delete (comma-separated): "
+    )
+    try:
+        indices = [int(i.strip()) for i in indices_to_delete.split(",") if i.strip().isdigit()]
+    except ValueError:
+        print("Invalid input. Please enter integers separated by commas.")
+        return
+
+    columns_to_delete = [df.columns[i] for i in indices]
+    print(f"\nDeleting columns: {columns_to_delete}")
+    df_cleaned = df.drop(columns=columns_to_delete)
+
+    # Save cleaned file
+    print("\nSelect where to save the cleaned CSV...")
+    save_path = asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+    if save_path:
+        df_cleaned.to_csv(save_path, index=False)
+        print(f"Cleaned file saved to: {save_path}")
+    else:
+        print("Save canceled.")
+
+if __name__ == "__main__":
+    delete_selected_columns()
