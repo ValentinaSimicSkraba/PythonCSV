@@ -4,8 +4,8 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
 # === SWITCHES ===
-custom_legend_names = False
-plotting_for_presentation = False
+custom_legend_names = True
+plotting_for_presentation = True
 enable_dual_y_axes = False  # Enable separate y-axis on the right side
 
 def plot_from_csv():

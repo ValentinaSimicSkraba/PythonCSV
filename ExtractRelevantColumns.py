@@ -13,8 +13,8 @@ def keep_selected_columns():
         print("No file selected.")
         return
 
-    # df = pd.read_csv(csv_file)
-    df = pd.read_csv(csv_file, sep=';')
+    df = pd.read_csv(csv_file)
+    # df = pd.read_csv(csv_file, sep=';')
 
     # Display columns with indices
     print("\nAvailable columns:")
