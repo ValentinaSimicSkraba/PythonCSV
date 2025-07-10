@@ -9,7 +9,7 @@ from scipy.interpolate import interp1d
 custom_legend_names = True
 plotting_for_presentation = True
 enable_dual_y_axes = False  # Enable separate y-axis on the right side
-prompt_for_title = True  # Prompt for plot title
+prompt_for_title = False  # Prompt for plot title
 
 def select_and_load_csv(prompt):
     print(prompt)
