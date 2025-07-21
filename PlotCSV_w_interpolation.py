@@ -18,6 +18,8 @@ def select_and_load_csv(prompt):
         print("No file selected.")
         return None
     df = pd.read_csv(file_path)
+    # df = pd.read_csv(file_path, delimiter = ";")
+
     return df
 
 def choose_columns(df, role):
