@@ -7,6 +7,7 @@ from tkinter.filedialog import askopenfilename
 custom_legend_names = False
 plotting_for_presentation = True
 enable_dual_y_axes = False  # Enable separate y-axis on the right side
+custom_title = False
 
 def plot_from_csv():
     # Create a Tkinter root window (hidden)
@@ -97,8 +98,12 @@ def plot_from_csv():
             handles2, labels2 = ax2.get_legend_handles_labels()
             handles += handles2
             labels += labels2
-
-        plt.title(f"{left_label} & {right_label if ax2 else ''} vs {x_col}")
+        if custom_title:
+            title = input("Enter title: ")
+        else:
+            title = f"{left_label} & {right_label if ax2 else ''} vs {x_col}"
+            
+        plt.title(title)
         plt.legend(handles, labels)
         plt.tight_layout()
         plt.show()

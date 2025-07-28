@@ -26,11 +26,11 @@ gas = ct.Solution('nDodecane_Reitz.yaml')
 
 # Define stoichiometric diesel-air mixture (use C12H23 for diesel)
 gas.TP = 1800, 2e7  # T in K, P in Pa
-gas.set_equivalence_ratio(phi=0.8, fuel='c12h26', oxidizer={'o2':1.0, 'n2':3.76})
+gas.set_equivalence_ratio(phi=0.4, fuel='c12h26', oxidizer={'o2':1.0, 'n2':3.76})
 
 # Equilibrate at constant T, P
 gas.equilibrate('TP')
 
 # Print equilibrium concentrations
-for species in ['co2', 'h2O', 'co', 'o2']:
+for species in ['co2', 'h2O', 'co', 'o2', 'n2']:
     print(f"{species}: {gas.concentrations[gas.species_index(species)]:.3e} mol/cm³")
