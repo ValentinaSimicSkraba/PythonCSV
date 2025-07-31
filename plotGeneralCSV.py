@@ -21,8 +21,8 @@ def plot_from_csv():
         return
 
     # Load CSV
-    df = pd.read_csv(csv_file)
-    # df = pd.read_csv(csv_file,delimiter = ';')
+    # df = pd.read_csv(csv_file)
+    df = pd.read_csv(csv_file,delimiter = ';')
     
     # Show available columns
     print("\nAvailable columns:")
