@@ -4,6 +4,7 @@ import numpy as np
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 from scipy.interpolate import interp1d
+import os
 
 # === SWITCHES ===
 custom_legend_names = True
@@ -11,16 +12,28 @@ plotting_for_presentation = True
 enable_dual_y_axes = False  # Enable separate y-axis on the right side
 prompt_for_title = True  # Prompt for plot title
 
-def select_and_load_csv(prompt):
+def select_and_load_csv(prompt="Select a data file"):
     print(prompt)
-    file_path = askopenfilename(filetypes=[("CSV files", "*.csv")])
+    file_path = askopenfilename(filetypes=[("Data files", "*.csv *.txt")])
     if not file_path:
         print("No file selected.")
-        return None
-    df = pd.read_csv(file_path)
-    # df = pd.read_csv(file_path, delimiter = ";")
+        return None, None
 
-    return df
+    file_ext = os.path.splitext(file_path)[1].lower()
+
+    try:
+        if file_ext == ".csv":
+            df = pd.read_csv(file_path, delimiter=';')
+        elif file_ext == ".txt":
+            df = pd.read_csv(file_path, sep=r'\s+', engine='python')
+        else:
+            print("Unsupported file format.")
+            return None, None
+    except Exception as e:
+        print(f"Failed to read file: {e}")
+        return None, None
+
+    return df, file_path
 
 def choose_columns(df, role):
     print(f"\nAvailable columns for {role}:")
@@ -44,11 +57,13 @@ def compare_two_csvs():
     root = Tk()
     root.withdraw()
 
-    df1 = select_and_load_csv("Select the FIRST CSV file")
-    if df1 is None: return
+    df1, file_path1 = select_and_load_csv("Select the FIRST CSV/TXT file")
+    if df1 is None:
+        return
 
-    df2 = select_and_load_csv("Select the SECOND CSV file")
-    if df2 is None: return
+    df2, file_path2 = select_and_load_csv("Select the SECOND CSV/TXT file")
+    if df2 is None:
+        return
 
     x1_col, y1_col = choose_columns(df1, "FIRST file")
     x2_col, y2_col = choose_columns(df2, "SECOND file")
@@ -111,7 +126,9 @@ def compare_two_csvs():
 
     if prompt_for_title:
         title = input("Enter plot title: ")
-        plt.title(title)
+    else:
+        title = f"{legend1} vs {x1_col}"
+    plt.title(title)
     plt.legend(handles, labels)
     plt.tight_layout()
     plt.show()

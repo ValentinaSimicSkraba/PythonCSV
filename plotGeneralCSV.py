@@ -2,6 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
+import os
+import re
+
 
 # === SWITCHES ===
 custom_legend_names = False
@@ -14,15 +17,36 @@ def plot_from_csv():
     root = Tk()
     root.withdraw()
 
-    # File selection
-    csv_file = askopenfilename(filetypes=[("CSV files", "*.csv")])
-    if not csv_file:
+    # File selection: allow CSV and TXT
+    file_path = askopenfilename(filetypes=[("Data files", "*.csv *.txt")])
+    if not file_path:
         print("No file selected.")
         return
 
-    # Load CSV
-    # df = pd.read_csv(csv_file)
-    df = pd.read_csv(csv_file,delimiter = ';')
+    # Determine file extension and set delimiter
+    file_ext = os.path.splitext(file_path)[1].lower()
+    if file_ext == ".csv":
+        delimiter = ';'  # Change if your CSVs are comma-delimited
+    elif file_ext == ".txt":
+        delimiter = None  # Try auto-detecting with pandas
+    else:
+        print("Unsupported file format.")
+        return
+
+    try:
+        try:
+            if file_ext == ".csv":
+                df = pd.read_csv(file_path, delimiter=';')  # or ',' if that's your CSV format
+            elif file_ext == ".txt":
+                df = pd.read_csv(file_path, sep=r'\s+', engine='python')  # handle whitespace
+            else:
+                raise ValueError("Unsupported file type.")
+        except Exception as e:
+            print("Failed to read file:", e)
+            return
+    except Exception as e:
+        print("Failed to read file with default delimiter, trying auto-detect...")
+        df = pd.read_csv(file_path, sep=None, engine='python')  # Auto-detect
     
     # Show available columns
     print("\nAvailable columns:")
