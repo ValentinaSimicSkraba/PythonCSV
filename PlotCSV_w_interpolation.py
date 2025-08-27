@@ -23,7 +23,7 @@ def select_and_load_csv(prompt="Select a data file"):
 
     try:
         if file_ext == ".csv":
-            df = pd.read_csv(file_path, delimiter=';')
+            df = pd.read_csv(file_path, delimiter=';')  # Change if your CSVs are comma-delimited
         elif file_ext == ".txt":
             df = pd.read_csv(file_path, sep=r'\s+', engine='python')
         else:
@@ -97,8 +97,8 @@ def compare_two_csvs():
     ax2 = ax1.twinx() if enable_dual_y_axes else None
 
     # Legend names
-    legend1 = input(f"Legend name for {y1_col}: ") if custom_legend_names else y1_col
-    legend2 = input(f"Legend name for {y2_col} (interpolated): ") if custom_legend_names else y2_col
+    legend1 = input(f"Legend name for {y1_col} from {os.path.basename(file_path1)}: ") if custom_legend_names else y1_col
+    legend2 = input(f"Legend name for {y2_col} (interpolated) from {os.path.basename(file_path2)}: ") if custom_legend_names else y2_col
 
     # Colors
     color1 = 'tab:blue'

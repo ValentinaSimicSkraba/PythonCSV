@@ -26,9 +26,9 @@ def plot_from_csv():
     # Determine file extension and set delimiter
     file_ext = os.path.splitext(file_path)[1].lower()
     if file_ext == ".csv":
-        delimiter = ';'  # Change if your CSVs are comma-delimited
+        delim = ';'  # Change if your CSVs are comma-delimited
     elif file_ext == ".txt":
-        delimiter = None  # Try auto-detecting with pandas
+        delim = None  # Try auto-detecting with pandas
     else:
         print("Unsupported file format.")
         return
@@ -36,7 +36,7 @@ def plot_from_csv():
     try:
         try:
             if file_ext == ".csv":
-                df = pd.read_csv(file_path, delimiter=';')  # or ',' if that's your CSV format
+                df = pd.read_csv(file_path, delimiter=delim)  # or ',' if that's your CSV format
             elif file_ext == ".txt":
                 df = pd.read_csv(file_path, sep=r'\s+', engine='python')  # handle whitespace
             else:
