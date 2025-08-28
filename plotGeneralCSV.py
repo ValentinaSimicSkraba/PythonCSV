@@ -8,7 +8,7 @@ import re
 
 # === SWITCHES ===
 custom_legend_names = False
-plotting_for_presentation = True
+plotting_for_presentation = False
 enable_dual_y_axes = False  # Enable separate y-axis on the right side
 custom_title = False
 
@@ -26,7 +26,7 @@ def plot_from_csv():
     # Determine file extension and set delimiter
     file_ext = os.path.splitext(file_path)[1].lower()
     if file_ext == ".csv":
-        delim = ';'  # Change if your CSVs are comma-delimited
+        delim = ','  # Change if your CSVs are comma-delimited
     elif file_ext == ".txt":
         delim = None  # Try auto-detecting with pandas
     else:
