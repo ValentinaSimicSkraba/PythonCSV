@@ -10,7 +10,7 @@ from scipy.interpolate import interp1d
 custom_legend_names = True
 plotting_for_presentation = True
 enable_dual_y_axes = False
-prompt_for_title = False
+prompt_for_title = True
 
 def select_folder():
     root = Tk()
@@ -89,9 +89,9 @@ def compare_csvs_from_folder():
     for i in range(len(dfs)):
         color = colors[i % len(colors)]
         if enable_dual_y_axes and ax2 and i == 1:
-            ax2.plot(x_base, y_all[i], label=legends[i], linewidth=line_width, linestyle='--', color=color)
+            ax2.plot(x_base, y_all[i], label=legends[i], linewidth=line_width, linestyle='-', color=color)
         else:
-            ax1.plot(x_base, y_all[i], label=legends[i], linewidth=line_width, linestyle='-' if i == 0 else '--', color=color)
+            ax1.plot(x_base, y_all[i], label=legends[i], linewidth=line_width, linestyle='-' if i == 0 else '-', color=color)
 
     ax1.set_xlabel(x_col)
     ax1.set_ylabel(f"{y_label} [{y_units}]")

@@ -23,7 +23,7 @@ def select_and_load_csv(prompt="Select a data file"):
 
     try:
         if file_ext == ".csv":
-            df = pd.read_csv(file_path, delimiter=',')  # Change if your CSVs are comma-delimited
+            df = pd.read_csv(file_path, delimiter=';')  # Change if your CSVs are comma-delimited
         elif file_ext == ".txt":
             df = pd.read_csv(file_path, sep=r'\s+', engine='python')
         else:
