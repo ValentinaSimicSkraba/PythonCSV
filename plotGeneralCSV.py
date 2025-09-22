@@ -7,10 +7,10 @@ import re
 
 
 # === SWITCHES ===
-custom_legend_names = False
-plotting_for_presentation = False
+custom_legend_names = True
+plotting_for_presentation = True
 enable_dual_y_axes = False  # Enable separate y-axis on the right side
-custom_title = False
+custom_title = True
 
 def plot_from_csv():
     # Create a Tkinter root window (hidden)

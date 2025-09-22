@@ -9,7 +9,7 @@ import os
 # === SWITCHES ===
 custom_legend_names = True
 plotting_for_presentation = True
-enable_dual_y_axes = False
+enable_dual_y_axes = True
 prompt_for_title = False
 xAxisLabelAutomatic = False   # <-- set to False to prompt for custom X-axis label
 
@@ -19,7 +19,7 @@ def select_and_load_csv(prompt):
     if not file_path:
         print("No file selected.")
         return None, None
-    df = pd.read_csv(file_path, sep=',')  # Assuming CSVs are comma-separated
+    df = pd.read_csv(file_path, sep=';')  # Assuming CSVs are comma-separated
     return df, os.path.basename(file_path)
 
 def choose_columns(df, label):
