@@ -6,12 +6,15 @@ from tkinter.filedialog import askopenfilename
 from scipy.interpolate import interp1d
 import os
 
+# === DELIMITER ===
+
 # === SWITCHES ===
 custom_legend_names = True          # If True, prompt for FILE-LEVEL legend names (used in both modes)
 plotting_for_presentation = True
-enable_dual_y_axes = False           # Toggle dual right axis
+enable_dual_y_axes = False           # Toggle dual right axis (created only if needed)
 prompt_for_title = True             # Prompt for plot title
 interpolate_second_to_first = True  # Put file #2 on file #1's X grid for clean overlay
+
 
 def select_and_load_csv(prompt="Select a data file"):
     print(prompt)
@@ -23,8 +26,7 @@ def select_and_load_csv(prompt="Select a data file"):
     ext = os.path.splitext(file_path)[1].lower()
     try:
         if ext == ".csv":
-            # Change delimiter to ',' if your CSVs are comma-delimited
-            df = pd.read_csv(file_path, delimiter=';')
+            df = pd.read_csv(file_path, delimiter=',')
         elif ext == ".txt":
             df = pd.read_csv(file_path, sep=r'\s+', engine='python')
         else:
@@ -46,14 +48,19 @@ def get_index(prompt_text, df, allow_empty=False):
     s = input(prompt_text).strip()
     if allow_empty and s == "":
         return None
-    idx = int(s)
-    return df.columns[idx]
+    try:
+        idx = int(s)
+        return df.columns[idx]
+    except Exception:
+        print("Invalid selection. Skipping this field.")
+        return None if allow_empty else df.columns[0]  # fall back to first col if not skippable
 
 def choose_columns(df, role, dual_axes: bool):
     list_columns(df, role)
-    x_col = get_index(f"\nEnter index of X-axis column for {role}: ", df)
+    x_col  = get_index(f"\nEnter index of X-axis column for {role}: ", df)
     if dual_axes:
-        yl_col = get_index(f"Enter index of LEFT-Y column for {role} (solid): ", df, allow_empty=False)
+        # Allow skipping EITHER Y on a per-file basis
+        yl_col = get_index(f"Enter index of LEFT-Y column for {role} (solid, Enter to skip): ", df, allow_empty=True)
         yr_col = get_index(f"Enter index of RIGHT-Y column for {role} (dashed, Enter to skip): ", df, allow_empty=True)
     else:
         yl_col = get_index(f"Enter index of Y column for {role}: ", df, allow_empty=False)
@@ -87,26 +94,9 @@ def compare_two_csvs():
     base1 = os.path.basename(path1)
     base2 = os.path.basename(path2)
 
-    # ---- Choose columns according to dual-axis mode
+    # ---- Choose columns
     x1_col, y1L_col, y1R_col = choose_columns(df1, "FIRST file", enable_dual_y_axes)
     x2_col, y2L_col, y2R_col = choose_columns(df2, "SECOND file", enable_dual_y_axes)
-
-    # ---- Axis labels
-    yL_label = input("Left Y-axis label (e.g. Temperature): ").strip() or "Left Y"
-    yL_units = input("Left Y-axis units (e.g. K): ").strip()
-    if enable_dual_y_axes:
-        yR_label = input("Right Y-axis label (e.g. Lambda): ").strip() or "Right Y"
-        yR_units = input("Right Y-axis units (e.g. -): ").strip()
-    else:
-        yR_label = yR_units = ""
-
-    # ---- FILE-LEVEL legend names (ALWAYS honor custom_legend_names)
-    if custom_legend_names:
-        file_label_1 = input(f"Legend label for FILE 1 [{base1}]: ").strip() or base1
-        file_label_2 = input(f"Legend label for FILE 2 [{base2}]: ").strip() or base2
-    else:
-        file_label_1 = base1
-        file_label_2 = base2
 
     # ---- Data arrays
     x1 = df1[x1_col].to_numpy()
@@ -126,6 +116,28 @@ def compare_two_csvs():
         x_plot = None   # use native grids
         y2L, y2R = y2L_raw, y2R_raw
 
+    # Determine which axes are actually needed
+    any_left  = (y1L is not None) or (y2L is not None)
+    any_right = enable_dual_y_axes and ((y1R is not None) or (y2R is not None))
+
+    # ---- Axis labels (ask only for axes that will be used)
+    yL_label = yL_units = ""
+    yR_label = yR_units = ""
+    if any_left:
+        yL_label = (input("Left Y-axis label (e.g. Temperature): ").strip() or "Left Y")
+        yL_units = input("Left Y-axis units (e.g. K): ").strip()
+    if any_right:
+        yR_label = (input("Right Y-axis label (e.g. Lambda): ").strip() or "Right Y")
+        yR_units = input("Right Y-axis units (e.g. -): ").strip()
+
+    # ---- FILE-LEVEL legend names
+    if custom_legend_names:
+        file_label_1 = input(f"Legend label for FILE 1 [{base1}]: ").strip() or base1
+        file_label_2 = input(f"Legend label for FILE 2 [{base2}]: ").strip() or base2
+    else:
+        file_label_1 = base1
+        file_label_2 = base2
+
     # === Plotting settings ===
     line_width = 2.8 if plotting_for_presentation else 2.0
     font_settings = {
@@ -139,7 +151,7 @@ def compare_two_csvs():
 
     fig = plt.figure(figsize=(12, 7))
     axL = plt.gca()
-    axR = axL.twinx() if enable_dual_y_axes else None
+    axR = axL.twinx() if any_right else None  # create right axis ONLY if needed
 
     # Colors per file (same color for both lines of the same file)
     color1 = 'tab:blue'
@@ -147,48 +159,52 @@ def compare_two_csvs():
 
     # ---- Plot File 1
     lines1 = []
-    if y1L is not None:
+    if any_left and (y1L is not None):
         l1, = axL.plot(
-            x1, y1L,
-            linewidth=line_width, linestyle='-',
+            x1, y1L, linewidth=line_width, linestyle='-',
             color=color1,
-            label=(file_label_1 if not enable_dual_y_axes else None)  # in single-axis mode, label the line
+            label=(file_label_1 if not any_right else None)
         )
         lines1.append(l1)
-    if enable_dual_y_axes and (axR is not None) and (y1R is not None):
-        l2, = axR.plot(x1, y1R, linewidth=line_width, linestyle='--', color=color1)
+    if any_right and (y1R is not None):
+        l2, = axR.plot(
+            x1, y1R, linewidth=line_width, linestyle='-',
+            color=color1
+        )
         lines1.append(l2)
 
     # ---- Plot File 2
     lines2 = []
     X2_for_plot = (x_plot if interpolate_second_to_first else x2)
-    if y2L is not None:
+    if any_left and (y2L is not None):
         l3, = axL.plot(
-            X2_for_plot, y2L,
-            linewidth=line_width, linestyle='-',
+            X2_for_plot, y2L, linewidth=line_width, linestyle='-',
             color=color2,
-            label=(file_label_2 if not enable_dual_y_axes else None)  # in single-axis mode, label the line
+            label=(file_label_2 if not any_right else None)
         )
         lines2.append(l3)
-    if enable_dual_y_axes and (axR is not None) and (y2R is not None):
-        l4, = axR.plot(X2_for_plot, y2R, linewidth=line_width, linestyle='--', color=color2)
+    if any_right and (y2R is not None):
+        l4, = axR.plot(
+            X2_for_plot, y2R, linewidth=line_width, linestyle='-',
+            color=color2
+        )
         lines2.append(l4)
 
     # ---- Labels
     axL.set_xlabel(x1_col)  # label x by File 1's x selection
-    axL.set_ylabel(f"{yL_label} [{yL_units}]" if yL_units else yL_label)
-    if enable_dual_y_axes and axR is not None:
+    if any_left:
+        axL.set_ylabel(f"{yL_label} [{yL_units}]" if yL_units else yL_label)
+    if any_right and axR is not None:
         axR.set_ylabel(f"{yR_label} [{yR_units}]" if yR_units else yR_label)
 
     # ---- Grid & Legend
     axL.grid(True)
 
-    if enable_dual_y_axes:
+    if any_right:
         # Legend grouped per file (one entry per file)
         rep1 = first_non_none(lines1)
         rep2 = first_non_none(lines2)
-        handles = []
-        labels  = []
+        handles, labels = [], []
         if rep1 is not None:
             handles.append(rep1); labels.append(file_label_1)
         if rep2 is not None:
