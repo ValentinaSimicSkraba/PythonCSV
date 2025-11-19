@@ -9,7 +9,7 @@ import os
 # === SWITCHES ===
 custom_legend_names = True
 plotting_for_presentation = True
-enable_dual_y_axes = True
+enable_dual_y_axes = False
 prompt_for_title = False
 xAxisLabelAutomatic = False   # <-- set to False to prompt for custom X-axis label
 
