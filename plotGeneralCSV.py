@@ -26,7 +26,7 @@ def plot_from_csv():
     # Determine file extension and set delimiter
     file_ext = os.path.splitext(file_path)[1].lower()
     if file_ext == ".csv":
-        delim = ','  # Change if your CSVs are comma-delimited
+        delim = ';'  # Change if your CSVs are comma-delimited
     elif file_ext == ".txt":
         delim = None  # Try auto-detecting with pandas
     else:
