@@ -5,7 +5,7 @@ from tkinter import Tk, filedialog
 
 # ====== SETTINGS ======
 CRANK_COL_NAME     = "CrankAngleSensor"        # name of the crank angle column
-NEW_CRANK_COL_NAME = "CrankAngle_mod"    # new modified crank angle column
+NEW_CRANK_COL_NAME = "CrankAngle [deg]"    # new modified crank angle column
 
 INPUT_DELIM  = ";"                       # current delimiter in your files
 OUTPUT_DELIM = ","                       # desired delimiter

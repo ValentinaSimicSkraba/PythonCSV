@@ -12,6 +12,8 @@ plotting_for_presentation = True
 enable_dual_y_axes = False
 prompt_for_title = False
 xAxisLabelAutomatic = False   # <-- set to False to prompt for custom X-axis label
+compareGroupsOfGraphs = False  # <<< NEW: group pairs of graphs with shared colors/linestyles
+
 
 def select_and_load_csv(prompt):
     print(prompt)
@@ -19,8 +21,9 @@ def select_and_load_csv(prompt):
     if not file_path:
         print("No file selected.")
         return None, None
-    df = pd.read_csv(file_path, sep=';')  # Assuming CSVs are comma-separated
+    df = pd.read_csv(file_path, sep=',')  # Assuming CSVs are comma-separated
     return df, os.path.basename(file_path)
+
 
 def choose_columns(df, label):
     print(f"\nAvailable columns for {label}:")
@@ -30,9 +33,11 @@ def choose_columns(df, label):
     y_index = int(input(f"Enter the index of the Y-axis column for {label}: "))
     return df.columns[x_index], df.columns[y_index]
 
+
 def interpolate_to_common_x(x_target, x, y):
     f_interp = interp1d(x, y, bounds_error=False, fill_value=np.nan)
     return f_interp(x_target)
+
 
 def compare_multiple_csvs():
     # Hide Tkinter root
@@ -86,49 +91,100 @@ def compare_multiple_csvs():
         y_interp = interpolate_to_common_x(x_base, x, y)
         y_all.append(y_interp)
 
+    # === Grouping setup (for colors & linestyles) ===
+    if compareGroupsOfGraphs:
+        group_size = int(input("How many graphs should be grouped together (e.g. 2)? "))
+        if group_size < 1:
+            group_size = 1
+    else:
+        group_size = None  # no grouping
+
     # === Plotting ===
     plt.figure(figsize=(12, 7))
     ax1 = plt.gca()
     ax2 = ax1.twinx() if enable_dual_y_axes else None
 
+    # Line width
     line_width = 2.5 if plotting_for_presentation else 2.0
-    font_settings = {
-        'axes.labelsize': 16,
-        'xtick.labelsize': 14,
-        'ytick.labelsize': 14,
-        'legend.fontsize': 14,
-        'axes.titlesize': 18
-    } if plotting_for_presentation else {}
-    plt.rcParams.update(font_settings)
+
+    # Font sizes
+    if plotting_for_presentation:
+        label_size = 16
+        tick_size = 14
+        legend_size = 14
+        title_size = 18
+    else:
+        label_size = 12
+        tick_size = 10
+        legend_size = 10
+        title_size = 12
 
     colors = plt.cm.tab10.colors  # Up to 10 colors
 
-    for i in range(num_files):
-        color = colors[i % len(colors)]
-        if enable_dual_y_axes and ax2 and i == 1:
-            ax2.plot(x_base, y_all[i], label=legends[i], linewidth=line_width, linestyle='-', color=color)
-        else:
-            ax1.plot(x_base, y_all[i], label=legends[i], linewidth=line_width, linestyle='-', color=color)
+    # Linestyle cycle within each group:
+    # first solid, second dashed, then dotted, dashdot if group_size > 2
+    linestyle_cycle = ['-', '--', ':', '-.']  # <<< NEW
 
-    ax1.set_xlabel(x_label)
-    ax1.set_ylabel(f"{y_label} [{y_units}]")
+    for i in range(num_files):
+        # Decide color and linestyle
+        if compareGroupsOfGraphs and group_size is not None:
+            group_index = i // group_size                     # which group (0, 1, 2, ...)
+            index_in_group = i % group_size                   # position inside group
+            color = colors[group_index % len(colors)]         # same color within a group
+            linestyle = linestyle_cycle[index_in_group % len(linestyle_cycle)]
+        else:
+            # Old behavior: each line its own color, solid
+            color = colors[i % len(colors)]
+            linestyle = '-'
+
+        if enable_dual_y_axes and ax2 and i == 1:
+            ax2.plot(
+                x_base, y_all[i],
+                label=legends[i],
+                linewidth=line_width,
+                linestyle=linestyle,
+                color=color
+            )
+        else:
+            ax1.plot(
+                x_base, y_all[i],
+                label=legends[i],
+                linewidth=line_width,
+                linestyle=linestyle,
+                color=color
+            )
+
+    # Axis labels
+    ax1.set_xlabel(x_label, fontsize=label_size)
+    ax1.set_ylabel(f"{y_label} [{y_units}]", fontsize=label_size)
     if enable_dual_y_axes and ax2:
-        ax2.set_ylabel(f"{y_label} [{y_units}]")
+        ax2.set_ylabel(f"{y_label} [{y_units}]", fontsize=label_size)
+
+    # Tick label sizes
+    ax1.tick_params(axis='both', labelsize=tick_size)
+    if ax2:
+        ax2.tick_params(axis='both', labelsize=tick_size)
 
     ax1.grid(True)
+
+    # Legend
     handles, labels = ax1.get_legend_handles_labels()
     if ax2:
         h2, l2 = ax2.get_legend_handles_labels()
         handles += h2
         labels += l2
 
+    leg = ax1.legend(handles, labels, fontsize=legend_size)
+
+    # Title (optional)
     if prompt_for_title:
         title = input("Enter plot title: ")
-        plt.title(title)
+        if title:
+            ax1.set_title(title, fontsize=title_size)
 
-    plt.legend(handles, labels)
     plt.tight_layout()
     plt.show()
+
 
 if __name__ == "__main__":
     compare_multiple_csvs()
