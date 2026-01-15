@@ -26,7 +26,7 @@ def select_and_load_csv(prompt="Select a data file"):
     ext = os.path.splitext(file_path)[1].lower()
     try:
         if ext == ".csv":
-            df = pd.read_csv(file_path, delimiter=';')
+            df = pd.read_csv(file_path, delimiter=',')
         elif ext == ".txt":
             df = pd.read_csv(file_path, sep=r'\s+', engine='python')
         else:

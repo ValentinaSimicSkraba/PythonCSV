@@ -21,7 +21,7 @@ def select_and_load_csv(prompt):
     if not file_path:
         print("No file selected.")
         return None, None
-    df = pd.read_csv(file_path, sep=',')  # Assuming CSVs are comma-separated
+    df = pd.read_csv(file_path, sep=';')  # Assuming CSVs are comma-separated
     return df, os.path.basename(file_path)
 
 
