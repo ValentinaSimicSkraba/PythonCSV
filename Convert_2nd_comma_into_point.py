@@ -1,5 +1,5 @@
-input_file  = "volumeCyl.csv"
-output_file = "volumeCyl_fixed.csv"
+input_file  = "Temperature_BZ.csv"
+output_file = "Temperature_BZ_fixed.csv"
 
 with open(input_file, "r", encoding="utf-8") as fin, \
      open(output_file, "w", encoding="utf-8") as fout:

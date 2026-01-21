@@ -7,7 +7,7 @@ import re
 
 
 # === SWITCHES ===
-custom_legend_names = True
+custom_legend_names = False
 plotting_for_presentation = True
 enable_dual_y_axes = False  # Enable separate y-axis on the right side
 custom_title = True

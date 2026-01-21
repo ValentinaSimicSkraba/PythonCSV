@@ -10,7 +10,7 @@ import os
 
 # === SWITCHES ===
 custom_legend_names = True          # If True, prompt for FILE-LEVEL legend names (used in both modes)
-plotting_for_presentation = True
+plotting_for_presentation = True    # If True, use thicker lines and larger fonts
 enable_dual_y_axes = False           # Toggle dual right axis (created only if needed)
 prompt_for_title = True             # Prompt for plot title
 interpolate_second_to_first = True  # Put file #2 on file #1's X grid for clean overlay
