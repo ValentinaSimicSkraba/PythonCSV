@@ -27,7 +27,7 @@ df0["Finish"] = pd.to_datetime(df0["Finish"])
 # Settings (your milestones + countdown)
 # -----------------------------
 milestones = {
-    "Final Twin from RWU": "2026-04-01",
+    "Final Twin from RWU": "2026-03-09",
     "ALARMBOT face-to-face meeting": "2026-06-10",
 }
 
